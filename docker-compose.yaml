@@ -1,0 +1,9 @@
+services:
+  bnufsa:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bnufsa:latest
+    container_name: bnufsa
+    volumes:
+      - ./logs:/bnufsa/logs

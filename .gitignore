@@ -1,0 +1,13 @@
+temp*
+tmp*
+*out
+*.log
+.DS_Store
+.idea/
+.vscode/
+__pycache__/
+
+config.toml
+config-private.toml
+logging.yaml
+loguru.toml
