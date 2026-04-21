@@ -1,5 +1,6 @@
 import asyncio as aio
 import datetime as dt
+import dttb
 import logging
 import logging.config
 import os
@@ -26,7 +27,6 @@ from binance_common.configuration import (
 )
 
 from bnufsa import (
-    apply_datetime_excepthook,
     AsyncCoroutineGroup,
     BNUFSARecorder,
     BNUFSATrader,
@@ -146,6 +146,8 @@ async def launch(
 
 
 def main() -> None:
+    dttb.apply()
+
     config = {}
     with (
         open(r"./config.toml", mode="rb") as f0,
@@ -160,5 +162,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    apply_datetime_excepthook()
     main()

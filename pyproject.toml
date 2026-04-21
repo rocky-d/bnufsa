@@ -9,6 +9,7 @@ dependencies = [
     "aiocsv>=1.4.0",
     "binance-common",
     "binance-sdk-derivatives-trading-usds-futures",
+    "dttb>=0.3.2",
     "loguru>=0.7.3",
     "pandas>=2.3.2",
     "pyyaml>=6.0.3",

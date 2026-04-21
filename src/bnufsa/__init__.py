@@ -10,9 +10,6 @@ from .bnufsa import (
     BNUFSAMonitor,
     BNUFSA,
 )
-from .datetime_excepthook import (
-    apply_datetime_excepthook,
-)
 from .ls_pair import (
     LSPairManagerFullError,
     NonPoppingError,
@@ -48,7 +45,6 @@ __all__ = [
     "BNUFSAController",
     "BNUFSAMonitor",
     "BNUFSA",
-    "apply_datetime_excepthook",
     "LSPairManagerFullError",
     "NonPoppingError",
     "ClientOrderId",
