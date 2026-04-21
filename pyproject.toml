@@ -7,6 +7,7 @@ authors = [{ name = "Rocky Haotian Du", email = "2712479005@qq.com" }]
 requires-python = ">=3.12"
 dependencies = [
     "aiocsv>=1.4.0",
+    "atask>=0.2.1",
     "binance-common",
     "binance-sdk-derivatives-trading-usds-futures",
     "dttb>=0.3.2",

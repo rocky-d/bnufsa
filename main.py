@@ -1,4 +1,5 @@
 import asyncio as aio
+import atask
 import datetime as dt
 import dttb
 import logging
@@ -27,7 +28,6 @@ from binance_common.configuration import (
 )
 
 from bnufsa import (
-    AsyncCoroutineGroup,
     BNUFSARecorder,
     BNUFSATrader,
     BNUFSAController,
@@ -82,7 +82,7 @@ async def launch(
     logger.critical(config["bnufsa"])
 
     logger.critical(">>> ENTER >>>")
-    async with AsyncCoroutineGroup(
+    async with atask.AsyncTaskGroup(
         (
             BNUFSA(
                 symbol=params["symbol"],
@@ -136,7 +136,7 @@ async def launch(
             )
             for params in config["bnufsa"]
         ),
-        name=f"{name}:{AsyncCoroutineGroup.__name__}",
+        name=f"{name}:{atask.AsyncTaskGroup.__name__}",
     ) as spread_arbitrage_group:
         try:
             await spread_arbitrage_group

@@ -1,6 +1,7 @@
 import aiocsv
 import aiofiles
 import asyncio as aio
+import atask
 import collections
 import functools
 from aiocsv.protocols import CsvDialectArg, CsvDialectKwargs
@@ -48,7 +49,6 @@ from binance_sdk_derivatives_trading_usds_futures.websocket_streams.models impor
     TradeLite,
 )
 
-from .async_coroutine import AsyncCoroutine
 from .ls_pair import LSPair, LSPairManager, Role
 from .order_book import LimitOrderBook
 from .time_window import SparseTimeWindow
@@ -72,7 +72,7 @@ FileDescriptorOrPath: TypeAlias = int | StrOrBytesPath
 Opener: TypeAlias = Callable[[FileDescriptorOrPath, int], int]
 
 
-class BNUFSARecorder(AsyncCoroutine[None]):
+class BNUFSARecorder(atask.AsyncTask[None]):
     def __init__(
         self,
         *,
@@ -148,7 +148,7 @@ class BNUFSARecorder(AsyncCoroutine[None]):
                     continue
                 await writer.writerow(self._que.popleft())
 
-    async def _run(
+    async def _atask(
         self,
     ) -> None:
         async with aio.TaskGroup() as tg:
@@ -159,7 +159,7 @@ class BNUFSARecorder(AsyncCoroutine[None]):
             )
 
 
-class BNUFSATrader(AsyncCoroutine[None]):
+class BNUFSATrader(atask.AsyncTask[None]):
     def __init__(
         self,
         *,
@@ -436,15 +436,15 @@ class BNUFSATrader(AsyncCoroutine[None]):
             self._que.task_done()
             logger.trace(f"{task.get_name() = }")
 
-    async def stop(
+    async def astop(
         self,
     ) -> None:
-        if self.unstarted:
+        if not self.started:
             return
         await super().stop()
         await self._que.join()
 
-    async def _run(
+    async def _atask(
         self,
     ) -> None:
         async with aio.TaskGroup() as tg:
@@ -455,7 +455,7 @@ class BNUFSATrader(AsyncCoroutine[None]):
             )
 
 
-class BNUFSAController(AsyncCoroutine[None]):
+class BNUFSAController(atask.AsyncTask[None]):
     def __init__(
         self,
         recorder: BNUFSARecorder,
@@ -763,7 +763,7 @@ class BNUFSAController(AsyncCoroutine[None]):
                 continue
             await aio.sleep(self._open_sleep_interval / 1000)
 
-    async def _run(
+    async def _atask(
         self,
     ) -> None:
         async with aio.TaskGroup() as tg:
@@ -779,7 +779,7 @@ class BNUFSAController(AsyncCoroutine[None]):
             )
 
 
-class BNUFSAMonitor(AsyncCoroutine[None]):
+class BNUFSAMonitor(atask.AsyncTask[None]):
     def __init__(
         self,
         controller: BNUFSAController,
@@ -834,7 +834,7 @@ class BNUFSAMonitor(AsyncCoroutine[None]):
         logger.trace(repr(data))
         self._controller.update_bt(data)
 
-    async def start(
+    async def astart(
         self,
     ) -> None:
         if self.started:
@@ -849,10 +849,10 @@ class BNUFSAMonitor(AsyncCoroutine[None]):
         self._book_ticker_stream.on("message", self._book_ticker_stream_on_message)
         await super().start()
 
-    async def stop(
+    async def astop(
         self,
     ) -> None:
-        if self.unstarted:
+        if not self.started:
             return
         await super().stop()
         await self._book_ticker_stream.unsubscribe()
@@ -876,7 +876,7 @@ class BNUFSAMonitor(AsyncCoroutine[None]):
             self._user_data_stream = await self._ws_streams.user_data(self._listen_key)
             self._user_data_stream.on("message", self._user_data_stream_on_message)
 
-    async def _run(
+    async def _atask(
         self,
     ) -> None:
         async with aio.TaskGroup() as tg:
@@ -887,7 +887,7 @@ class BNUFSAMonitor(AsyncCoroutine[None]):
             )
 
 
-class BNUFSA(AsyncCoroutine[None]):
+class BNUFSA(atask.AsyncTask[None]):
     def __init__(
         self,
         *,
@@ -937,7 +937,7 @@ class BNUFSA(AsyncCoroutine[None]):
             **({} if kwargs_monitor is None else kwargs_monitor),
         )
 
-    async def start(
+    async def astart(
         self,
     ) -> None:
         if self.started:
@@ -952,10 +952,10 @@ class BNUFSA(AsyncCoroutine[None]):
         await super().start()
         logger.critical(f"Started {self}")
 
-    async def stop(
+    async def astop(
         self,
     ) -> None:
-        if self.unstarted:
+        if not self.started:
             return
         logger.critical(f"Stopping {self}")
         await super().stop()
@@ -967,7 +967,7 @@ class BNUFSA(AsyncCoroutine[None]):
         await self._ws_api.close_connection()
         logger.critical(f"Stopped {self}")
 
-    async def _run(
+    async def _atask(
         self,
     ) -> None:
         resp = await self._ws_api.position_information_v2(symbol=self._symbol)
